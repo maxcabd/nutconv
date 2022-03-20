@@ -135,7 +135,7 @@ def xfbin_tex_export(): # Function that exports both DDS and NUT files from XFBI
 			BC3_HEADER = struct.pack(dxt_fstring, *structDXT(b'DXT5'))
 
 			# DXT10 headers
-			B5G5R5A1_HEADER = struct.pack(dxt10_fstring, *structDXT10(0x400, 0x56, 0x10, RGB_555))
+			B5G5R5A1_HEADER = struct.pack(dxt10_fstring, *structDXT10(0x400, 0x41, 0x10, RGB_555))
 			B4G4R4A4_HEADER = struct.pack(dxt10_fstring, *structDXT10(0x400, 0x41, 0x10, RGB_444))
 			B5G6R5_HEADER = struct.pack(dxt10_fstring, *structDXT10(0x400, 0x40, 0x10, RGB_565))
 			B8G8R8A8_HEADER = struct.pack(dxt10_fstring, *structDXT10(0x800, 0x5B, 0x20, RGB_888))
