@@ -42,7 +42,7 @@ def xfbin_tex_export(): # Function that exports both DDS and NUT files from XFBI
 			header = B5G6R5_HEADER
 		elif (pixel == 14):
 			header = B8G8R8A8_HEADER
-		elif (pixel == 16):
+		elif (pixel == 17):
 			header = B8G8R8A8_HEADER
 		return header		
 
@@ -53,7 +53,7 @@ def xfbin_tex_export(): # Function that exports both DDS and NUT files from XFBI
 			data = array.array('u', data)
 			data.byteswap()
 			chunk[i][0] = array.array('u', header) + data
-		if (pixel == 16 or pixel == 14):
+		if (pixel == 14 or pixel == 17):
 			data = array.array('l', data)
 			data.byteswap()
 			chunk[i][0] = array.array('l', header) + data
@@ -138,7 +138,7 @@ def xfbin_tex_export(): # Function that exports both DDS and NUT files from XFBI
 			B5G5R5A1_HEADER = struct.pack(dxt10_fstring, *structDXT10(0x400, 0x41, 0x10, RGB_555))
 			B4G4R4A4_HEADER = struct.pack(dxt10_fstring, *structDXT10(0x400, 0x41, 0x10, RGB_444))
 			B5G6R5_HEADER = struct.pack(dxt10_fstring, *structDXT10(0x400, 0x40, 0x10, RGB_565))
-			B8G8R8A8_HEADER = struct.pack(dxt10_fstring, *structDXT10(0x800, 0x5B, 0x20, RGB_888))
+			B8G8R8A8_HEADER = struct.pack(dxt10_fstring, *structDXT10(0x800, 0x41, 0x20, RGB_888))
 			
 			compress_DXTn(dds_chunk, pixel_format, set_header(pixel_format), texture_data) #Combines bytes for DDS file
 			nut_chunk.append(nut)	
