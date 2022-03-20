@@ -143,7 +143,7 @@ def xfbin_tex_export(): # Function that exports both DDS and NUT files from XFBI
 			
 			compress_DXTn(dds_chunk, pixel_format, set_header(pixel_format), texture_data) #Combines bytes for DDS file
 			nut_chunk.append(nut)	
-			ntp3_offset = mm.find(b'\x4e\x54\x50\x33', ntp3_offset + 1) #Find new occurence of 'NDP3' with each loop
+			ntp3_offset = mm.find(b'\x4e\x54\x50\x33', ntp3_offset + 1) #Find new occurence of 'NTP3' with each loop
 		
 		# --Create files and dump to folder--
 		folder = outpath + '{} Textures'.format(tail[:-6]) + "\\"
