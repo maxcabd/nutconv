@@ -12,7 +12,7 @@ Download the .zip file from Releases.
 * Drag and drop .xfbin (must contain NUT textures) file onto the .exe to get NUT/DDS textures.
 * Drag and drop 1 .dds file to create a .nut file with 1 GIDX texture.
 * Drag and drop 2 .dds files to create a .nut file with 2 GIDX textures. And so on and so forth.
-* Once you have your .nut file use SutandoTsukai181's .xfbin Blender addon  [here](https://github.com/SutandoTsukai181/cc2_xfbin_blender "here title") to load your .nut file for your model.
+* Once you have your .nut file use SutandoTsukai181's .xfbin Blender addon  [here](https://github.com/SutandoTsukai181/cc2_xfbin_blender "here title") to load your .nut file for your model, stage, effect file, etc.
 
 
 ## More Information
