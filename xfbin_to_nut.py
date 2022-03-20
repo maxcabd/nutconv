@@ -90,11 +90,11 @@ def xfbin_tex_export(): # Function that exports both DDS and NUT files from XFBI
 		for i in range(len(texture_names)):
 			texture_names[i] = texture_names[i].split('/')[-1:][0][:-4]
 		
-		# NTP3 & GIDX offset
+		# NTP3 offsets
 		ntp3_count = file.count(NUT.NUT_MAGIC) 
 		ntp3_offset = mm.find(NUT.NUT_MAGIC)
 		ntp3_size_offset = ntp3_offset - 4
-
+		
 		def nut_dump():
 			xfbin.seek(ntp3_offset + 24)
 			NUT.data_size = read_uint32(xfbin)
@@ -134,7 +134,6 @@ def xfbin_tex_export(): # Function that exports both DDS and NUT files from XFBI
 			BC2_HEADER = struct.pack(dxt_fstring, *structDXT(b'DXT3'))
 			BC3_HEADER = struct.pack(dxt_fstring, *structDXT(b'DXT5'))
 
-
 			# DXT10 headers
 			B5G5R5A1_HEADER = struct.pack(dxt10_fstring, *structDXT10(0x400, 0x56, 0x10, RGB_555))
 			B4G4R4A4_HEADER = struct.pack(dxt10_fstring, *structDXT10(0x400, 0x41, 0x10, RGB_444))
@@ -150,12 +149,11 @@ def xfbin_tex_export(): # Function that exports both DDS and NUT files from XFBI
 		if not os.path.exists(folder):
 			os.makedirs(folder)
 
-
 		dds_names = [s + '.dds' for s in texture_names]
 		for i, j in enumerate((dds_chunk)):
 			with open(folder + dds_names[i], "wb") as dds:
 				dds.write(dds_chunk[i][0])
-		
+				
 		nut_names = [s + '.nut' for s in texture_names]
 		for i, j in enumerate((nut_chunk)):
 			with open(folder + nut_names[i], "wb") as nut:
