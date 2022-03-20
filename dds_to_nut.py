@@ -27,9 +27,12 @@ def dds_to_nut():
 				
 				dds.seek(0x4D)
 				flags = read_uint32(dds)
-				if (flags == DXGI_555):
+				
+				dds.seek(0x5B)
+				r_bitmask = read_uint32(dds)
+				if (flags == DXGI_555 and r_bitmask == 0x7C00):
 					pixel_format = 0x6
-				elif (flags == DXGI_444):
+				elif (flags == DXGI_444 and r_bitmask == 0xF00):
 					pixel_format = 0x7
 				elif (flags == DXGI_565):
 					pixel_format = 0x8
