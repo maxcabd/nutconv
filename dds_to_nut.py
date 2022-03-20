@@ -4,10 +4,10 @@ import struct, os, array, sys
 from utils import* #read_uint32, read_uint16, read_uint8, read_str32, struct_NUT
 
 # DXGI Formats 
-DXGI_555 = 0x56
+DXGI_555 = 0x41
 DXGI_444 = 0x41
 DXGI_565 = 0x40
-DXGI_888 = 0x5B
+DXGI_888 = 0x41
 
 	
 def dds_to_nut():
@@ -36,8 +36,8 @@ def dds_to_nut():
 					pixel_format = 0x7
 				elif (flags == DXGI_565):
 					pixel_format = 0x8
-				elif (flags == DXGI_888):
-					pixel_format = 0x10
+				elif (flags == DXGI_888 and r_bitmask == 0xFF0000):
+					pixel_format = 0x11
 
 				dds.seek(0x54)
 				compression_type = read_str32(dds)
