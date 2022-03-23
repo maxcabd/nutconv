@@ -93,9 +93,10 @@ def xfbin_tex_export(): # Function that exports both DDS and NUT files from XFBI
 		# NTP3 offsets
 		ntp3_count = file.count(NUT.NUT_MAGIC) 
 		ntp3_offset = mm.find(NUT.NUT_MAGIC)
-		ntp3_size_offset = ntp3_offset - 4
+		
 		
 		def nut_dump():
+			ntp3_size_offset = ntp3_offset - 4
 			xfbin.seek(ntp3_offset + 24)
 			NUT.data_size = read_uint32(xfbin)
 			xfbin.seek(ntp3_offset + 28)
