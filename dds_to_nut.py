@@ -28,13 +28,13 @@ def dds_to_nut():
 				dds.seek(0x4D)
 				flags = read_uint32(dds)
 				
-				dds.seek(0x5B)
-				r_bitmask = read_uint32(dds)
+				dds.seek(0x5C)
+				r_bitmask = swap32(read_uint32(dds))
 				if (flags == DXGI_555 and r_bitmask == 0x7C00):
 					pixel_format = 0x6
 				elif (flags == DXGI_444 and r_bitmask == 0xF00):
 					pixel_format = 0x7
-				elif (flags == DXGI_565):
+				elif (flags == DXGI_565 and r_bitmask == 0xF800):
 					pixel_format = 0x8
 				elif (flags == DXGI_888 and r_bitmask == 0xFF0000):
 					pixel_format = 0x11
@@ -63,13 +63,19 @@ def dds_to_nut():
 					texture_data = array.array('u', texture_data)
 					
 				
-				nut_header, eXt_header = struct_NUT(total_size, data_size, mipmaps, len(sys.argv)-1, pixel_format, width, height)
+				added_mips = calculate_mip_size(mipmaps) // 4
+				nut_header, eXt_header = struct_NUT(total_size, data_size, mipmaps, added_mips, len(sys.argv)-1, pixel_format, width, height)
 				nut_fstring = '4sHHII'
 				nut_header = struct.pack(nut_fstring, *nut_header)
+				
 				if (mipmaps > 1):
-					eXt_fstring = 'III HH hH HH 6I {}I 3s III 4s III'.format(mipmaps)
+					if added_mips != 0:
+						eXt_fstring = 'III HH HH HH 6I {}I {}I 3s III 4s III'.format(mipmaps, added_mips)		
+					else:		
+						eXt_fstring = 'III HH HH HH 6I {}I 3s III 4s III'.format(mipmaps)
 				else:
-					eXt_fstring = 'III HH hH HH 6I 3s III 4s III'
+					eXt_fstring = 'III HH HH HH 6I 3s III 4s III'
+				
 				eXt_header = struct.pack(eXt_fstring, *eXt_header)
 				nut_texture = eXt_header + texture_data
 				return nut_header, nut_texture
