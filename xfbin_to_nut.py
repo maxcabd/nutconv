@@ -18,8 +18,7 @@ RGB_888 = (0x00FF0000, 0x00FF00, 0xFF, 0xFF000000)
 
 
 def xfbin_tex_export(): # Function that exports both DDS and NUT files from XFBIN files
-
-# --Useful functions--
+	
 	def generate_chunk(chunk, data, size, mipmap, pixel, height, width): #Creates nested list chunk from NUT values
 			chunk.append([])
 			chunk[i].append([])
@@ -117,7 +116,7 @@ def xfbin_tex_export(): # Function that exports both DDS and NUT files from XFBI
 			nut = xfbin.read(nut_size)
 			return NUT.texture_data, NUT.data_size, NUT.mipmap_count, NUT.pixel_format, NUT.height, NUT.width, nut
 
-		# --Append Raw NUT Texture data and DDS header to Array-- // Will include alt texture data later
+		# append raw NUT texture data and DDS header to a list
 		dds_chunk = []
 		nut_chunk = []
 		for i in range(ntp3_count):
@@ -144,7 +143,7 @@ def xfbin_tex_export(): # Function that exports both DDS and NUT files from XFBI
 			nut_chunk.append(nut)	
 			ntp3_offset = mm.find(b'\x4e\x54\x50\x33', ntp3_offset + 1) #Find new occurence of 'NTP3' with each loop
 		
-		# --Create files and dump to folder--
+		# create files and dump to folder
 		folder = outpath + '{} Textures'.format(tail[:-6]) + "\\"
 		if not os.path.exists(folder):
 			os.makedirs(folder)
