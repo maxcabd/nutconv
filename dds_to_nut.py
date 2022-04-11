@@ -11,8 +11,6 @@ DXGI_888 = 0x41
 
 	
 def dds_to_nut():
-	
-	
 	def get_data_dds(file):
 		with open(file, 'rb') as dds:
 				
