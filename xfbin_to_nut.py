@@ -19,12 +19,14 @@ RGB_888 = (0x00FF0000, 0x00FF00, 0xFF, 0xFF000000)
 
 def xfbin_tex_export(): # Function that exports both DDS and NUT files from XFBIN files
 	
-	def generate_chunk(chunk, data, size, mipmap, pixel, height, width): #Creates nested list chunk from NUT values
+	# creates nested list chunk from NUT values and must be used inside a for loop
+	def generate_chunk(chunk, data, size, mipmap, pixel, height, width): 
 			chunk.append([])
 			chunk[i].append([])
 			chunk[i].extend([data])
 			chunk[i].extend([[size, mipmap, pixel, height, width]])
-
+	
+	
 	def set_header(pixel):
 		if (pixel == 0):
 			header = BC1_HEADER
@@ -43,7 +45,8 @@ def xfbin_tex_export(): # Function that exports both DDS and NUT files from XFBI
 		elif (pixel == 17):
 			header = B8G8R8A8_HEADER
 		return header		
-
+	
+	# will check for pixel format and swap endian depending on the format
 	def compress_DXTn(chunk, pixel, header, data):
 		if (pixel == 0 or pixel == 1 or pixel == 2):
 			chunk[i][0] = array.array('u', header) + array.array('u', data)	
@@ -56,10 +59,12 @@ def xfbin_tex_export(): # Function that exports both DDS and NUT files from XFBI
 			data.byteswap()
 			chunk[i][0] = array.array('l', header) + data
 	
+	# struct for DXT and takes in parameters such as 'DXT1', 'DXT5', etc
 	def structDXT(compression):
 		reserved1 = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 		return  (b'DDS ', 0x7C, 0x1007, height, width, data_size, 0x0, mipmap_count, *reserved1, 0x20, 0x4, compression, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0)
-
+	
+	
 	def structDXT10(pitch, flags, bit, rgb):
 		reserved1 = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 		return (b'DDS ', 0x7C, 0x2100F, height, width, pitch, 0x0, mipmap_count, *reserved1, 0x20, flags, 0x0, bit, *rgb, 0x401008, 0x0, 0x0, 0x0, 0x0)
@@ -79,8 +84,10 @@ def xfbin_tex_export(): # Function that exports both DDS and NUT files from XFBI
 		XFBIN.File_Path_Count = read_uint32(xfbin)
 		xfbin.seek(40)
 		XFBIN.File_Path_size = read_uint32(xfbin)
-		xfbin.seek(XFBIN.HEADER_SIZE + XFBIN.Chunk_Type_Size)
 		
+		
+		# read strings in header file path section and append to list to get rexture names
+		xfbin.seek(XFBIN.HEADER_SIZE + XFBIN.Chunk_Type_Size)
 		for path_names in range(XFBIN.File_Path_Count):
 			read_str(path_names, file_path_list, xfbin) 
 		texture_names = [x for x in file_path_list if ".max" not in x and "celshade.nut" not in x] # Get names of Texture Chunks (ignore .max files and celshade texture)
@@ -92,7 +99,7 @@ def xfbin_tex_export(): # Function that exports both DDS and NUT files from XFBI
 		ntp3_count = file.count(NUT.NUT_MAGIC) 
 		ntp3_offset = mm.find(NUT.NUT_MAGIC)
 		
-		
+		# read NUT values and return them including the raw texture
 		def nut_dump():
 			ntp3_size_offset = ntp3_offset - 4
 			xfbin.seek(ntp3_offset + 24)
