@@ -26,15 +26,15 @@ class NUT:
 # -- Helper functions--
 def read_str(string_table, chunk_table, file):
 		
-		string_table = []
-		
-		for char in iter(lambda: file.read(1).strip(), b'\x00'):
-			char = char.decode("utf-8")
-			string_table.append(char)
-		string_table = [' ' if x == '' else x for x in string_table]
-		string_table = ''.join(string_table)
-		chunk_table.append(string_table)
-		return string_table
+	string_table = []
+
+	for char in iter(lambda: file.read(1).strip(), b'\x00'):
+		char = char.decode("utf-8")
+		string_table.append(char)
+	string_table = [' ' if x == '' else x for x in string_table]
+	string_table = ''.join(string_table)
+	chunk_table.append(string_table)
+	return string_table
 
 def read_uint32(file): 
 	
