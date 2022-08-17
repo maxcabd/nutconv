@@ -70,12 +70,12 @@ def swap16(i):
     return struct.unpack("<H", struct.pack(">H", i))[0]
 
 def halve_mip(level):
-		multiplier = 4
-		
-		if (level // 4 != multiplier):
-			return level // 4
-		else:
-			return level
+	multiplier = 4
+
+	if (level // 4 != multiplier):
+		return level // 4
+	else:
+		return level
 			
 def calculate_mips(mipmaps):
 	mip_levels = [1048576]
@@ -97,31 +97,31 @@ def calculate_mip_size(mipmaps):
 # Important functions
 
 def export_files(buffer, filename, data, path):
-			for i, j in enumerate((data)):
-				with open(path + filename[i], "wb") as file:
-					file.write(data[i])
+	for i, j in enumerate((data)):
+		with open(path + filename[i], "wb") as file:
+			file.write(data[i])
 
 
 # Struct Functions
 def struct_NUT(total_size, data_size, mipmaps, add_mips, dds_count, pixel, width, height):
-			pad6 = (0x0, 0x0, 0x0, 0x0, 0x0, 0x0)
-			nut = (b'NTP3 ', 0x1, swap16(dds_count), 0x0, 0x0)
-			mip_levels = [swap32(mip) for mip in calculate_mips(mipmaps)]
-			header_size = 80
+	pad6 = (0x0, 0x0, 0x0, 0x0, 0x0, 0x0)
+	nut = (b'NTP3 ', 0x1, swap16(dds_count), 0x0, 0x0)
+	mip_levels = [swap32(mip) for mip in calculate_mips(mipmaps)]
+	header_size = 80
 
-			if (mipmaps > 1):
-				if add_mips == 0:
-					header_size += (mipmaps * 4)
-					total_size = data_size + header_size
-					eXt = (swap32(total_size), 0x0, swap32(data_size), swap16(header_size), 0x0, mipmaps*256, pixel*256, width, height, *pad6, *mip_levels, b'eXt', swap32(0x20), swap32(0x10), 0x0, b'GIDX', swap32(0x10), 0x0, 0x0)
-				else:
-					header_size += (mipmaps * 4 + (add_mips* 4))
-					total_size = data_size + header_size
-					added_mips = []
-					for _ in range(add_mips):
-						added_mips.append(0)
-					eXt = (swap32(total_size), 0x0, swap32(data_size), swap16(header_size), 0x0, mipmaps*256, pixel*256, width, height, *pad6, *mip_levels, *added_mips, b'eXt', swap32(0x20), swap32(0x10), 0x0, b'GIDX', swap32(0x10), 0x0, 0x0)	
-			else:
-				total_size = data_size + header_size
-				eXt = (swap32(total_size), 0x0, swap32(data_size), swap16(header_size), 0x0, mipmaps*256, pixel*256, width, height, *pad6, b'eXt', swap32(0x20), swap32(0x10), 0x0, b'GIDX', swap32(0x10), 0x0, 0x0)		
-			return nut, eXt # NUT Header bytes and GIDX header bytes
+	if (mipmaps > 1):
+		if add_mips == 0:
+			header_size += (mipmaps * 4)
+			total_size = data_size + header_size
+			eXt = (swap32(total_size), 0x0, swap32(data_size), swap16(header_size), 0x0, mipmaps*256, pixel*256, width, height, *pad6, *mip_levels, b'eXt', swap32(0x20), swap32(0x10), 0x0, b'GIDX', swap32(0x10), 0x0, 0x0)
+		else:
+			header_size += (mipmaps * 4 + (add_mips* 4))
+			total_size = data_size + header_size
+			added_mips = []
+			for _ in range(add_mips):
+				added_mips.append(0)
+			eXt = (swap32(total_size), 0x0, swap32(data_size), swap16(header_size), 0x0, mipmaps*256, pixel*256, width, height, *pad6, *mip_levels, *added_mips, b'eXt', swap32(0x20), swap32(0x10), 0x0, b'GIDX', swap32(0x10), 0x0, 0x0)	
+	else:
+		total_size = data_size + header_size
+		eXt = (swap32(total_size), 0x0, swap32(data_size), swap16(header_size), 0x0, mipmaps*256, pixel*256, width, height, *pad6, b'eXt', swap32(0x20), swap32(0x10), 0x0, b'GIDX', swap32(0x10), 0x0, 0x0)		
+	return nut, eXt # NUT Header bytes and GIDX header bytes
