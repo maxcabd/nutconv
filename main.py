@@ -10,23 +10,9 @@ from xfbin_to_nut import xfbin_tex_export
 from dds_to_nut import dds_to_nut
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 if __name__ == '__main__':
 	for arg in sys.argv[1:]:
 		if arg.endswith('.xfbin'):
-			xfbin_tex_export()
+			xfbin_tex_export(arg)
 		elif arg.endswith('.dds'):
 			dds_to_nut()
