@@ -19,8 +19,5 @@ Download the .zip file from Releases.
 * Currently does not support the batch creation of .nut files. Drag DDS file(s) one at a time.
 * Only supports DXT1, DXT3, DXT5, B5G5R5A1, B4G4R4A4, B5G6R5, and B8G8R8A formats.
 
-## Future Releases
-GUI for exporting, creating, and viewing .nut textures.
-
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)

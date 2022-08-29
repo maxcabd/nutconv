@@ -1,13 +1,7 @@
-from cgitb import text
-from email.mime import image
-from operator import index
-from select import select
 import tkinter, sv_ttk, customtkinter
-from turtle import width
-#from pyglet import font
 from io import BytesIO
 from dds import nut2dds, write_dds,write_png, texture_565, texture_5551, texture_4444
-from tkinter import ttk, ANCHOR, Grid, Menu, filedialog as fd
+from tkinter import ttk, Grid, filedialog as fd
 from utils.xfbin_lib.xfbin.structure.nut import NutTexture, Pixel_Formats
 from xfbin import *
 from PIL import Image, ImageTk
@@ -317,10 +311,11 @@ class App(customtkinter.CTk):
     
     def copy_xfbin_texture(self):
         CopiedTextures.c_tex.clear()
-        selection = self.textures_list.selection()
+        selection = [i for i in self.textures_list.selection() if self.textures_list.parent(i) == '']
         if len(selection) > 0:
             for i in selection:
                 index = self.textures_list.index(i)
+                print(index)
                 texture = textures[index]
                 CopiedTextures.__init__(self, texture)
                 create_texture_chunk(self)
@@ -385,8 +380,8 @@ class App(customtkinter.CTk):
         index = self.xfbin_list.index(self.xfbin_list.selection()[0])
         xfbin = xfbins[index]
         path = fd.askopenfilename(title= 'Select a texture to import',
-                                    filetypes=[("NUT", "*.nut"), ("DDS", "*.dds"), ("PNG", "*.png")],
-                                    defaultextension=".nut")
+                                filetypes=[("NUT", "*.nut"), ("DDS", "*.dds"), ("PNG", "*.png")],
+                                defaultextension=".nut")
         
         if path != '':
             filename = path.split('/')[-1]
