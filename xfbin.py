@@ -1,7 +1,10 @@
+from dds import DDS_Header
 from utils.xfbin_lib.xfbin import *
 from utils.PyBinaryReader.binary_reader import BinaryReader
-from utils.xfbin_lib.xfbin.structure.nut import Nut
+from utils.xfbin_lib.xfbin.structure.nut import Nut, NutTexture
 from utils.xfbin_lib.xfbin.structure.br.br_nut import *
+from array import array
+from brDDS import BrDDS
 
 #read xfbin then store in a list    
 xfbins = list()
@@ -16,13 +19,15 @@ def write_xfbin(xfbin, xfbin_path):
     print("write_xfbin")
     xfbin_writer.write_xfbin_to_path(xfbin, xfbin_path)
 
-def write_nut(nut, nut_path):
-    nut: Nut
+
+def write_nut(texture, nut_path):
+    nut_path = f'{nut_path}//{texture.name}.nut'
+    nut: Nut = texture.nut
     br = BinaryReader(endianness=Endian.BIG)
     br.write_struct(BrNut(), nut)
     with open(nut_path, 'wb') as f:
         f.write(br.buffer())
-    print("write_nut")
+    print(f'Wrote {nut_path}')
 
 class CopiedTextures:
     c_tex = list()

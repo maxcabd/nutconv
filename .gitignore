@@ -2,3 +2,11 @@
 *.pyc
 tempCodeRunnerFile.py
 testfiles
+build
+dist
+PCI
+gui.spec
+test.py
+build command.txt
+file.py
+tempCodeRunnerFile.pyw
