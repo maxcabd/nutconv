@@ -219,7 +219,7 @@ class App(customtkinter.CTk):
     def update_texture_chunks(self, event):
         selection = self.xfbin_list.selection()
         if len(selection) > 0:
-            index = self.xfbin_list.index(selection)
+            index = self.xfbin_list.index(selection[0])
             xfbin = xfbins[index]
             if len(self.textures_list.get_children()) > 0:
                 #clear tree
@@ -295,10 +295,8 @@ class App(customtkinter.CTk):
 
             texture.name = self.texture_name.get()
             texture.filePath = self.texture_path.get()
+            self.textures_list.item(selection[0], text=texture.name)
 
-            self.textures_list.delete(texture_index)
-            self.textures_list.insert(texture_index, texture.name)
-    
     def export_xfbin(self):
         selection = self.xfbin_list.selection()
         path = fd.asksaveasfilename(title= 'Select a location to export XFBIN',

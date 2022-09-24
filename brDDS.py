@@ -21,7 +21,11 @@ class BrDDS(BrStruct):
 				self.texture_data = bytearray()
 				width = self.header.width
 				height = self.header.height
-				for i in range(self.header.mipMapCount):
+				if Header_Flags.values(self.header.flags) == 'DDSD_MIPMAPCOUNT':
+					mipmap_count = self.header.mipMapCount
+				else:
+					mipmap_count = 1
+				for i in range(mipmap_count):
 					self.mipmaps.append(br.read_bytes(int((max(1, (width + 3) // 4)) * max(1, (height + 3) // 4) * 8)))
 
 					self.texture_data.extend(self.mipmaps[i])
@@ -35,7 +39,11 @@ class BrDDS(BrStruct):
 				self.texture_data = bytearray()
 				width = self.header.width
 				height = self.header.height
-				for i in range(self.header.mipMapCount):
+				if Header_Flags.values(self.header.flags) == 'DDSD_MIPMAPCOUNT':
+					mipmap_count = self.header.mipMapCount
+				else:
+					mipmap_count = 1
+				for i in range(mipmap_count):
 					self.mipmaps.append(br.read_bytes(int((max(1, (width + 3) // 4)) * max(1, (height + 3) // 4) * 16)))
 
 					self.texture_data.extend(self.mipmaps[i])
@@ -53,7 +61,11 @@ class BrDDS(BrStruct):
 				self.texture_data = bytearray()
 				width = self.header.width
 				height = self.header.height
-				for i in range(self.header.mipMapCount):
+				if Header_Flags.values(self.header.flags) == 'DDSD_MIPMAPCOUNT':
+					mipmap_count = self.header.mipMapCount
+				else:
+					mipmap_count = 1
+				for i in range(mipmap_count):
 					#calculate mip map size and append to list
 					self.mipmaps.append(br.read_bytes((width * bitcount + 7) // 8 * height))
 					self.texture_data.extend(self.mipmaps[i])
@@ -171,14 +183,14 @@ class BrDDS_DX10_Header(BrStruct):
 		br.write_uint32(dds3.misc_flags2)
 
 class Header_Flags(IntFlag):
-	CAPS = 0x1
-	HEIGHT = 0x2
-	WIDTH = 0x4
-	PITCH = 0x8
-	PIXEL_FORMAT = 0x1000
-	MIPMAP_COUNT = 0x20000
-	LINEAR_SIZE = 0x80000
-	DEPTH = 0x800000
+	DDSD_CAPS = 0x1
+	DDSD_HEIGHT = 0x2
+	DDSD_WIDTH = 0x4
+	DDSD_PITCH = 0x8
+	DDSD_PIXELFORMAT = 0x1000
+	DDSD_MIPMAPCOUNT = 0x20000
+	DDSD_LINEARSIZE = 0x80000
+	DDSD_DEPTH = 0x800000
 
 	@classmethod
 	def values(cls, flags):
