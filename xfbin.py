@@ -10,9 +10,18 @@ from brDDS import BrDDS
 xfbins = list()
 textures = list()
 
+def create_xfbin():
+    xfbin = Xfbin()
+    xfbin.add_chunk_page(NuccChunkNull())
+    return xfbin
+
 def read_xfbin(xfbin_path):
-    xfbin = xfbin_reader.read_xfbin(xfbin_path)
-    xfbins.append(xfbin)
+    try:
+        xfbin = xfbin_reader.read_xfbin(xfbin_path)
+    except:
+        return None
+    return xfbin
+
     
 
 def write_xfbin(xfbin, xfbin_path):
@@ -29,6 +38,11 @@ def write_nut(texture, nut_path):
         f.write(br.buffer())
     print(f'Wrote {nut_path}')
 
+def nut_to_texture(nut, name):
+    tex = NuccChunkTexture(f'c/chr/tex/{name}', f'{name}')
+    tex.nut = nut
+    return tex
+
 class CopiedTextures:
     c_tex = list()
     def __init__(self, texture: NuccChunkTexture):
@@ -42,13 +56,12 @@ def create_texture_chunk(self):
     CopiedTextures(self).c_tex.append(tex)
     return tex
 
-def texture_from_file(path, name):
+def read_nut(path, name):
     with open(path, 'rb') as f:
         data = f.read()
     with BinaryReader(data, Endian.BIG) as br:
         nut: BrNut = br.read_struct(BrNut)
 
-    tex = NuccChunkTexture(f'c/chr/tex/{name}', f'{name[:-4]}')
-    tex.nut = nut
+    tex = nut_to_texture(nut, name)
 
     return tex

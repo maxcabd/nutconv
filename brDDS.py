@@ -1,4 +1,3 @@
-from ntpath import join
 from utils.PyBinaryReader.binary_reader import BrStruct, BinaryReader
 from enum import Enum, IntEnum, IntFlag
 from array import array
@@ -21,11 +20,10 @@ class BrDDS(BrStruct):
 				self.texture_data = bytearray()
 				width = self.header.width
 				height = self.header.height
-				if Header_Flags.values(self.header.flags) == 'DDSD_MIPMAPCOUNT':
-					mipmap_count = self.header.mipMapCount
-				else:
-					mipmap_count = 1
-				for i in range(mipmap_count):
+				if self.header.mipMapCount == 0:
+					self.header.mipMapCount = 1
+
+				for i in range(self.header.mipMapCount):
 					self.mipmaps.append(br.read_bytes(int((max(1, (width + 3) // 4)) * max(1, (height + 3) // 4) * 8)))
 
 					self.texture_data.extend(self.mipmaps[i])
@@ -39,11 +37,9 @@ class BrDDS(BrStruct):
 				self.texture_data = bytearray()
 				width = self.header.width
 				height = self.header.height
-				if Header_Flags.values(self.header.flags) == 'DDSD_MIPMAPCOUNT':
-					mipmap_count = self.header.mipMapCount
-				else:
-					mipmap_count = 1
-				for i in range(mipmap_count):
+				if self.header.mipMapCount == 0:
+					self.header.mipMapCount = 1
+				for i in range(self.header.mipMapCount):
 					self.mipmaps.append(br.read_bytes(int((max(1, (width + 3) // 4)) * max(1, (height + 3) // 4) * 16)))
 
 					self.texture_data.extend(self.mipmaps[i])
@@ -61,11 +57,9 @@ class BrDDS(BrStruct):
 				self.texture_data = bytearray()
 				width = self.header.width
 				height = self.header.height
-				if Header_Flags.values(self.header.flags) == 'DDSD_MIPMAPCOUNT':
-					mipmap_count = self.header.mipMapCount
-				else:
-					mipmap_count = 1
-				for i in range(mipmap_count):
+				if self.header.mipMapCount == 0:
+					self.header.mipMapCount = 1
+				for i in range(self.header.mipMapCount):
 					#calculate mip map size and append to list
 					self.mipmaps.append(br.read_bytes((width * bitcount + 7) // 8 * height))
 					self.texture_data.extend(self.mipmaps[i])
@@ -122,7 +116,6 @@ class BrDDS_Header(BrStruct):
 		self.reserved2 = br.read_uint32()
 	def __br_write__(self, br: 'BinaryReader', dds1: 'DDS_Header'):
 		br.write_uint32(dds1.size)
-		print(f'Header Size = {dds1.size}')
 		br.write_uint32(dds1.flags)
 		br.write_uint32(dds1.height)
 		br.write_uint32(dds1.width)

@@ -71,6 +71,14 @@ nut_bpp = {
     17: 4,
 }
 
+def read_dds(path):
+	with open(path, 'rb') as f:
+			file = f.read()
+
+	with BinaryReader(file, Endian.LITTLE) as br:
+		dds: BrDDS = br.read_struct(BrDDS)
+	return dds
+
 def DDS_to_NutTexture(dds):
 	dds: BrDDS
 	nut = NutTexture()
@@ -80,8 +88,14 @@ def DDS_to_NutTexture(dds):
 
 	if dds.header.pixel_format.fourCC != '':
 		nut.pixel_format = nut_pf_fourcc[dds.header.pixel_format.fourCC]
-		nut.mipmaps = dds.mipmaps
-		nut.texture_data = dds.texture_data
+		nut.mipmaps = list()
+		nut.texture_data = b''
+		for mip in dds.mipmaps:
+			if len(mip) < 16:
+				mip += b'\x00' * (16 - len(mip))
+			print(len(mip))
+			nut.mipmaps.append(mip)
+			nut.texture_data += mip
 	elif dds.header.pixel_format.bitmasks:
 		nut.pixel_format = nut_pf_bitmasks[dds.header.pixel_format.bitmasks]
 		nut.mipmaps = list()
@@ -96,6 +110,8 @@ def DDS_to_NutTexture(dds):
 
 		else:
 			for mip in dds.mipmaps:
+				if len(mip) < 16:
+					mip += b'\x00' * (16 - len(mip))
 				mip = array('u', mip)
 				mip.byteswap()
 				nut.mipmaps.append(mip.tobytes())
@@ -106,10 +122,12 @@ def DDS_to_NutTexture(dds):
 	nut.is_cube_map = False
 	nut.cubemap_format = 0
 
-	nut.data_size = len(dds.texture_data)
+	nut.data_size = len(nut.texture_data)
 
 	if dds.header.mipMapCount > 1:
 		nut.header_size =  80 + (dds.header.mipMapCount * 4)
+		while nut.header_size % 10 != 8:
+			nut.header_size += 1
 	else:
 		nut.header_size = 80
 
