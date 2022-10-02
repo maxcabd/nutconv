@@ -149,7 +149,6 @@ def NutTexture_to_DDS(nuttex: NutTexture):
 
 	#check if nuttex.pixel_format is in nut_pf_fourcc
 	if nuttex.pixel_format in nut_pf_fourcc.values():
-		print('fourcc')
 
 		header.pixel_format.fourCC = list(nut_pf_fourcc.keys())[list(nut_pf_fourcc.values()).index(nuttex.pixel_format)]
 		header.flags |= 0x80000 #LINEAR_SIZE

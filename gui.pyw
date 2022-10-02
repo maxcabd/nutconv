@@ -8,7 +8,8 @@ from xfbin import *
 from PIL import Image, ImageTk
 from brDDS import *
 from utils.PyBinaryReader.binary_reader import BinaryReader
-from icon import icon
+from Images import icon, Error_Texture
+
 
 class App(tkinter.Tk):
     def __init__(self):
@@ -17,8 +18,8 @@ class App(tkinter.Tk):
         self.title("NUT Tools GUI")
         self.geometry("1000x600")
         self.iconphoto(True, tkinter.PhotoImage(data=icon))
-        
-        #self.iconbitmap("icon.ico")
+
+        # self.iconbitmap("icon.ico")
         sv_ttk.set_theme('dark')
 
         # window frame
@@ -53,15 +54,18 @@ class App(tkinter.Tk):
         self.upper_frame2.grid(row=0, column=1, sticky="nsew", padx=5, pady=5)
 
         self.import_texture = ttk.Menubutton(self.upper_frame2, text="Import Texture",
-                                         width=10)
+                                             width=10)
         self.import_texture.grid(
             row=0, column=0, sticky="nsew", padx=5, pady=5)
-        
+
         self.import_texture.menu = Menu(self.import_texture, tearoff=0)
         self.import_texture["menu"] = self.import_texture.menu
-        self.import_texture.menu.add_command(label="NUT", command=self.import_texture_nut)
-        self.import_texture.menu.add_command(label="DDS", command=self.import_texture_dds)
-        self.import_texture.menu.add_command(label="PNG", command=self.import_texture_png)
+        self.import_texture.menu.add_command(
+            label="NUT", command=self.import_texture_nut)
+        self.import_texture.menu.add_command(
+            label="DDS", command=self.import_texture_dds)
+        self.import_texture.menu.add_command(
+            label="PNG", command=self.import_texture_png)
 
         self.export_texture = ttk.Menubutton(self.upper_frame2, text="Export Texture",
                                              width=10)
@@ -344,19 +348,23 @@ class App(tkinter.Tk):
             self.textures_list.item(active, text=texture.name)
 
     def export_xfbin(self):
-        selection = self.xfbin_list.selection()
-        path = fd.asksaveasfilename(title='Select a location to export XFBIN',
-                                    filetypes=[("XFBIN", "*.xfbin")],
-                                    defaultextension=".xfbin",
-                                    initialfile=f"{self.xfbin_list.item(selection)['text']}.xfbin")
-        if path != '':
-            if len(selection) > 0:
-                xfbin_index = self.xfbin_list.index(selection[0])
-                xfbin = xfbins[xfbin_index]
-                write_xfbin(xfbin, path)
-        # show message box
-        tkinter.messagebox.showinfo(
-            "Export XFBIN", "XFBIN exported successfully!")
+        active = self.xfbin_list.focus()
+        if active == '':
+            tkinter.messagebox.showerror(
+                "Error", "No XFBIN selected to export")
+        else:
+            path = fd.asksaveasfilename(title='Select a location to export XFBIN',
+                                        filetypes=[("XFBIN", "*.xfbin")],
+                                        defaultextension=".xfbin",
+                                        initialfile=f"{self.xfbin_list.item(active)['text']}.xfbin")
+            if path != '':
+                if len(active) > 0:
+                    xfbin_index = self.xfbin_list.index(active)
+                    xfbin = xfbins[xfbin_index]
+                    write_xfbin(xfbin, path)
+                # show message box
+                tkinter.messagebox.showinfo(
+                    "Export XFBIN", "XFBIN exported successfully!")
 
     def export_nut(self):
         texture = self.textures_list.selection()
@@ -370,8 +378,11 @@ class App(tkinter.Tk):
                     texture_index = self.textures_list.index(tex)
                     texture = textures[texture_index]
                     write_nut(texture, path)
-        # show message box
-        tkinter.messagebox.showinfo("Export NUT", "NUT exported successfully!")
+            # show message box
+            tkinter.messagebox.showinfo("Export NUT", "NUT exported successfully!")
+        else:
+            tkinter.messagebox.showerror(
+                "Error", "No texture selected to export")
 
     def export_dds(self):
         texture = self.textures_list.selection()
@@ -385,8 +396,11 @@ class App(tkinter.Tk):
                     texture: NuccChunkTexture = textures[self.textures_list.index(
                         tex)]
                     write_dds(texture, path)
-        # show message box
-        tkinter.messagebox.showinfo("Export DDS", "DDS exported successfully!")
+            # show message box
+            tkinter.messagebox.showinfo("Export DDS", "DDS exported successfully!")
+        else:
+            tkinter.messagebox.showerror(
+                "Error", "No texture selected to export")
 
     def export_png(self):
         texture = self.textures_list.selection()
@@ -400,13 +414,17 @@ class App(tkinter.Tk):
                     texture: NuccChunkTexture = textures[self.textures_list.index(
                         tex)]
                     write_png(texture, path)
-        # show message box
-        tkinter.messagebox.showinfo("Export PNG", "PNG exported successfully!")
+            # show message box
+            tkinter.messagebox.showinfo("Export PNG", "PNG exported successfully!")
+        else:
+            tkinter.messagebox.showerror(
+                "Error", "No texture selected to export")
 
     def copy_nut_texture(self):
         CopiedTextures.c_tex.clear()
-        selection = [i for i in self.textures_list.selection(
-        ) if self.textures_list.parent(i) == '']
+        selection = [i for i in self.textures_list.selection()
+                    if self.textures_list.parent(i) == '']
+        
         if len(selection) > 0:
             for i in selection:
                 index = self.textures_list.index(i)
@@ -465,6 +483,7 @@ class App(tkinter.Tk):
             try:
                 image = Image.open(dds)
             except:
+                ErrorTex = tkinter.PhotoImage(data=Error_Texture)
                 image = Image.open('ErrorTexture.png')
 
         image = image.resize((370, 370), Image.Resampling.BICUBIC)
@@ -477,21 +496,21 @@ class App(tkinter.Tk):
     def import_texture_nut(self):
         active = self.xfbin_list.focus()
         if active == '':
-            #ask the user if they want to create a new xfbin
+            # ask the user if they want to create a new xfbin
             if tkinter.messagebox.askyesno("Import Texture", "No XFBIN is selected, would you like to create a new XFBIN?"):
                 xfbin = create_xfbin()
                 xfbins.append(xfbin)
                 self.xfbin_list.insert(
                     '', tkinter.END, text='TempXfbin')
-                
+
             else:
                 return
         else:
             index = self.xfbin_list.index(active)
             xfbin = xfbins[index]
         path = fd.askopenfilename(title='Select a texture to import',
-                                filetypes=[("NUT", "*.nut")],
-                                defaultextension=".nut")
+                                  filetypes=[("NUT", "*.nut")],
+                                  defaultextension=".nut")
 
         if path != '':
             filename = path.split('/')[-1]
@@ -500,7 +519,7 @@ class App(tkinter.Tk):
             textures.append(texture)
             self.textures_list.insert(
                 '', tkinter.END, text=texture.name, values=(texture.nut.texture_count))
-    
+
     def import_texture_png(self):
         tkinter.messagebox.showinfo("Import Texture", "Not implemented yet")
         '''active = self.xfbin_list.focus()
@@ -528,34 +547,35 @@ class App(tkinter.Tk):
             textures.append(texture)
             self.textures_list.insert(
                 '', tkinter.END, text=texture.name, values=(texture.nut.texture_count))'''
-    
+
     def import_texture_dds(self):
         active = self.xfbin_list.focus()
         if active == '':
-            #ask the user if they want to create a new xfbin
+            # ask the user if they want to create a new xfbin
             if tkinter.messagebox.askyesno("Import Texture", "No XFBIN is selected, would you like to create a new XFBIN?"):
                 xfbin = create_xfbin()
                 xfbins.append(xfbin)
                 self.xfbin_list.insert(
                     '', tkinter.END, text='TempXfbin')
-                #select the new xfbin
-                self.xfbin_list.selection_set(self.xfbin_list.get_children()[-1])
+                # select the new xfbin
+                self.xfbin_list.selection_set(
+                    self.xfbin_list.get_children()[-1])
             else:
                 return
-        
+
         else:
             index = self.xfbin_list.index(active)
             xfbin = xfbins[index]
         path = fd.askopenfilename(title='Select a texture to import',
-                                filetypes=[("DDS", "*.dds")],
-                                defaultextension=".dds")
+                                  filetypes=[("DDS", "*.dds")],
+                                  defaultextension=".dds")
 
         if path != '':
             dds = read_dds(path)
             nuttex = DDS_to_NutTexture(dds)
-            nut = Nut()   
+            nut = Nut()
             nut.magic = b'NUT\x00'
-            nut.version = 0x100       
+            nut.version = 0x100
             nut.texture_count = 1
             nut.textures = [nuttex]
 
@@ -564,7 +584,6 @@ class App(tkinter.Tk):
             textures.append(texture)
             self.textures_list.insert(
                 '', tkinter.END, text=texture.name, values=(texture.nut.texture_count))
-        
 
     def show_right_click_menu(self, event):
         selection = self.textures_list.selection()
@@ -612,7 +631,7 @@ class App(tkinter.Tk):
                 nuttex = DDS_to_NutTexture(dds)
                 texture.nut.textures.append(nuttex)
                 self.textures_list.insert(
-                    index, 'end', text=f'{len(texture.nut.textures)-1}')
+                    index, 'end', text=f'Texture {len(texture.nut.textures)}')
                 # update texture count
                 self.textures_list.item(
                     index, values=(texture.nut.texture_count))
