@@ -1,10 +1,11 @@
-from dds import DDS_Header
-from utils.xfbin_lib.xfbin import *
-from utils.PyBinaryReader.binary_reader import BinaryReader
-from utils.xfbin_lib.xfbin.structure.nut import Nut, NutTexture
-from utils.xfbin_lib.xfbin.structure.br.br_nut import *
 from array import array
+
 from brDDS import BrDDS
+from dds import DDS_Header
+from utils.PyBinaryReader.binary_reader import BinaryReader
+from utils.xfbin_lib.xfbin import *
+from utils.xfbin_lib.xfbin.structure.br.br_nut import *
+from utils.xfbin_lib.xfbin.structure.nut import Nut, NutTexture
 
 #read xfbin then store in a list    
 xfbins = list()
@@ -18,21 +19,9 @@ def create_xfbin():
 def read_xfbin(xfbin_path):
     try:
         xfbin = xfbin_reader.read_xfbin(xfbin_path)
-        '''for page in xfbin.pages:
-            for chunk in page.chunks:
-                if isinstance(chunk, NuccChunkTexture):
-                    chunk.has_props = True
-                elif isinstance(chunk, NuccChunkDynamics):
-                    chunk.has_props = True
-                elif isinstance(chunk, NuccChunkClump):
-                    chunk.has_props = True
-                elif isinstance(chunk, NuccChunkCoord):
-                    chunk.has_props = True
-                elif isinstance(chunk, NuccChunkModel):
-                    chunk.has_props = True'''
-
     except:
         return None
+
     return xfbin
 
     
@@ -42,7 +31,7 @@ def write_xfbin(xfbin, xfbin_path):
     xfbin_writer.write_xfbin_to_path(xfbin, xfbin_path)
 
 def nut_to_texture(nut, name):
-    tex = NuccChunkTexture(f'c/chr/tex/{name}', f'{name}')
+    tex = NuccChunkTexture(f'c/chr/tex/{name}.nut', f'{name}')
     tex.has_props = True
     tex.nut = nut
 
@@ -77,6 +66,7 @@ class CopiedTextures:
 
 def create_texture_chunk(self):
     tex = NuccChunkTexture(CopiedTextures(self).filePath, CopiedTextures(self).name)
+    tex.has_props = True
     tex.nut = CopiedTextures(self).nut
     CopiedTextures(self).c_tex.append(tex)
     return tex

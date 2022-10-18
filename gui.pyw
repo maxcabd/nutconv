@@ -1,14 +1,19 @@
 import tkinter
-import sv_ttk
 from io import BytesIO
-from dds import read_dds, NutTexture_to_DDS, DDS_to_NutTexture, write_dds, write_png, texture_565, texture_5551, texture_4444
-from tkinter import W, Menu, ttk, Grid, filedialog as fd
+from tkinter import Grid, Menu, W
+from tkinter import filedialog as fd
+from tkinter import ttk
+
+import sv_ttk
+from PIL import Image, ImageTk
+
+from brDDS import *
+from dds import (DDS_to_NutTexture, NutTexture_to_DDS, read_dds, read_dds_path,
+                 texture_565, texture_4444, texture_5551, write_dds, write_png)
+from Images import Error_Texture, icon
+from utils.PyBinaryReader.binary_reader import BinaryReader
 from utils.xfbin_lib.xfbin.structure.nut import NutTexture, Pixel_Formats
 from xfbin import *
-from PIL import Image, ImageTk
-from brDDS import *
-from utils.PyBinaryReader.binary_reader import BinaryReader
-from Images import icon, Error_Texture
 
 
 class App(tkinter.Tk):
@@ -244,9 +249,11 @@ class App(tkinter.Tk):
 
         self.texture_menu = Menu(self.window, tearoff=0)
         self.texture_menu.add_command(
-            label="Replace Texture", command=self.replace_texture)
+            label="Replace Texture (DDS)", command=self.replace_dds_texture)
         self.texture_menu.add_command(
-            label="Remove Texture", command=self.remove_nut_texture)
+            label="Replace Texture (PNG)", command=self.replace_png_texture)
+        self.texture_menu.add_command(
+            label="Remove Texture", command=self.remove_texture)
 
         self.textures_list.bind("<Button-3>", self.show_right_click_menu)
 
@@ -379,7 +386,8 @@ class App(tkinter.Tk):
                     texture = textures[texture_index]
                     write_nut(texture, path)
             # show message box
-            tkinter.messagebox.showinfo("Export NUT", "NUT exported successfully!")
+            tkinter.messagebox.showinfo(
+                "Export NUT", "NUT exported successfully!")
         else:
             tkinter.messagebox.showerror(
                 "Error", "No texture selected to export")
@@ -397,7 +405,8 @@ class App(tkinter.Tk):
                         tex)]
                     write_dds(texture, path)
             # show message box
-            tkinter.messagebox.showinfo("Export DDS", "DDS exported successfully!")
+            tkinter.messagebox.showinfo(
+                "Export DDS", "DDS exported successfully!")
         else:
             tkinter.messagebox.showerror(
                 "Error", "No texture selected to export")
@@ -415,7 +424,8 @@ class App(tkinter.Tk):
                         tex)]
                     write_png(texture, path)
             # show message box
-            tkinter.messagebox.showinfo("Export PNG", "PNG exported successfully!")
+            tkinter.messagebox.showinfo(
+                "Export PNG", "PNG exported successfully!")
         else:
             tkinter.messagebox.showerror(
                 "Error", "No texture selected to export")
@@ -423,8 +433,8 @@ class App(tkinter.Tk):
     def copy_nut_texture(self):
         CopiedTextures.c_tex.clear()
         selection = [i for i in self.textures_list.selection()
-                    if self.textures_list.parent(i) == '']
-        
+                     if self.textures_list.parent(i) == '']
+
         if len(selection) > 0:
             for i in selection:
                 index = self.textures_list.index(i)
@@ -514,39 +524,56 @@ class App(tkinter.Tk):
 
         if path != '':
             filename = path.split('/')[-1]
-            texture = read_nut(path, filename)
+            texture = read_nut(path, filename[:-4])
             xfbin.add_chunk_page(texture)
             textures.append(texture)
             self.textures_list.insert(
                 '', tkinter.END, text=texture.name, values=(texture.nut.texture_count))
 
     def import_texture_png(self):
-        tkinter.messagebox.showinfo("Import Texture", "Not implemented yet")
-        '''active = self.xfbin_list.focus()
+        active = self.xfbin_list.focus()
         if active == '':
-            #ask the user if they want to create a new xfbin
+            # ask the user if they want to create a new xfbin
             if tkinter.messagebox.askyesno("Import Texture", "No XFBIN is selected, would you like to create a new XFBIN?"):
                 xfbin = create_xfbin()
                 xfbins.append(xfbin)
                 self.xfbin_list.insert(
                     '', tkinter.END, text='TempXfbin')
-                
+
             else:
                 return
         else:
             index = self.xfbin_list.index(active)
             xfbin = xfbins[index]
         path = fd.askopenfilename(title='Select a texture to import',
-                                filetypes=[("PNG", "*.png")],
-                                defaultextension=".png")
+                                  filetypes=[("PNG", "*.png")],
+                                  defaultextension=".png")
 
         if path != '':
             filename = path.split('/')[-1]
-            texture = read_png(path, filename)
+            #use pillow to read the png
+            image = Image.open(path)
+            #convert image to rgba32
+            image = image.convert('RGBA')            
+            #convert the image to dds using pillow
+            dds = BytesIO()
+            image.save(dds, format='DDS')
+            dds.seek(0)
+            #convert the dds to a nut texture
+            texture = read_dds(dds.getvalue())
+            nuttex = DDS_to_NutTexture(texture)
+            nut = Nut()
+            nut.magic = b'NUT\x00'
+            nut.version = 0x100
+            nut.texture_count = 1
+            nut.textures = [nuttex]
+
+            texture = nut_to_texture(nut, path.split('/')[-1][:-4])
+
             xfbin.add_chunk_page(texture)
             textures.append(texture)
             self.textures_list.insert(
-                '', tkinter.END, text=texture.name, values=(texture.nut.texture_count))'''
+                '', tkinter.END, text=texture.name, values=(texture.nut.texture_count))
 
     def import_texture_dds(self):
         active = self.xfbin_list.focus()
@@ -571,7 +598,7 @@ class App(tkinter.Tk):
                                   defaultextension=".dds")
 
         if path != '':
-            dds = read_dds(path)
+            dds = read_dds_path(path)
             nuttex = DDS_to_NutTexture(dds)
             nut = Nut()
             nut.magic = b'NUT\x00'
@@ -579,7 +606,7 @@ class App(tkinter.Tk):
             nut.texture_count = 1
             nut.textures = [nuttex]
 
-            texture = nut_to_texture(nut, path.split('/')[-1])
+            texture = nut_to_texture(nut, path.split('/')[-1][:-4])
             xfbin.add_chunk_page(texture)
             textures.append(texture)
             self.textures_list.insert(
@@ -601,7 +628,7 @@ class App(tkinter.Tk):
     def replace_nut_texture(self):
         pass
 
-    def remove_nut(self):
+    def remove_nut_texture(self):
         # remove the texture from the xfbin
         selection = self.textures_list.selection()
         if len(selection) > 0:
@@ -614,7 +641,7 @@ class App(tkinter.Tk):
             self.textures_list.delete(selection[0])
 
     def add_texture(self):
-        files = fd.askopenfilenames(title='Select one or more XFBINs',
+        files = fd.askopenfilenames(title='Select one or more DDS textures',
                                     filetypes=[("DDS", "*.dds")], defaultextension=".dds")
         for file in files:
             if file != '':
@@ -635,12 +662,13 @@ class App(tkinter.Tk):
                 # update texture count
                 self.textures_list.item(
                     index, values=(texture.nut.texture_count))
+        
 
-    def replace_texture(self):
-        file = fd.askopenfilename(title='Select one or more XFBINs',
+    def replace_dds_texture(self):
+        file = fd.askopenfilename(title='Select one or more DDS textures',
                                   filetypes=[("DDS", "*.dds")], defaultextension=".dds")
         if file != '':
-            dds = read_dds(file)
+            dds = read_dds_path(file)
 
             selected = self.textures_list.selection()
             parent = self.textures_list.parent(selected)
@@ -654,19 +682,43 @@ class App(tkinter.Tk):
             self.update_text_variables(dds.header.height, dds.header.width, texture.nut.textures[self.textures_list.index(
                 selected)].pixel_format, dds.header.mipMapCount)
         print('done')
-
-    def remove_nut_texture(self):
-        selected = self.textures_list.selection()
-        for i in selected[::-1]:
-            parent = self.textures_list.parent(i)
+    
+    def replace_png_texture(self):
+        file = fd.askopenfilename(title='Select one or more PNG textures',
+                                  filetypes=[("PNG", "*.png")], defaultextension=".png")
+        if file != '':
+            image = Image.open(file)
+            image = image.convert('RGBA')
+            dds = BytesIO()
+            image.save(dds, format='DDS')
+            dds.seek(0)
+            dds = read_dds(dds.getvalue())
+            selected = self.textures_list.selection()
+            parent = self.textures_list.parent(selected)
             index = self.textures_list.index(parent)
             texture = textures[index]
-            texture.nut.textures.pop(self.textures_list.index(i))
-            texture.nut.texture_count -= 1
-            self.textures_list.delete(i)
-
-        self.textures_list.item(index, values=(texture.nut.texture_count))
+            texture.nut.textures[self.textures_list.index(
+                selected)] = DDS_to_NutTexture(dds)
+            self.update_texture_preview(
+                texture.nut.textures[self.textures_list.index(selected)])
+            self.update_name_path(None)
+            self.update_text_variables(dds.header.height, dds.header.width, texture.nut.textures[self.textures_list.index(
+                selected)].pixel_format, dds.header.mipMapCount)
         print('done')
+
+    def remove_texture(self):
+        selected = self.textures_list.selection()
+        if len(selected) > 0:
+            for i in selected[::-1]:
+                parent = self.textures_list.parent(i)
+                index = self.textures_list.index(parent)
+                texture = textures[index]
+                texture.nut.textures.pop(self.textures_list.index(i))
+                texture.nut.texture_count -= 1
+                self.textures_list.delete(i)
+
+            self.textures_list.item(index, values=(texture.nut.texture_count))
+            print('done')
 
 
 if __name__ == "__main__":
